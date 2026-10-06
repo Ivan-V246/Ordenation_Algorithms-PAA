@@ -1,5 +1,5 @@
 // Implementacao do algoritmo de ordenacao shellsort
-#include "shell_sort.h"
+#include <sort_algorithms.hpp>
 
 // Shell Sort para números naturais
 // Recebe o valor por referência

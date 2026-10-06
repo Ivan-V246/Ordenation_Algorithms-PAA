@@ -1,5 +1,5 @@
 // Implementacao do algoritmo de ordenacao coutingsort
-#include "counting_sort.h"
+#include <sort_algorithms.hpp>
 #include <vector>
 
 // Função do countingsort 

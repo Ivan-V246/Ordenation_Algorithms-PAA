@@ -1,0 +1,1 @@
+g++ -I include src/sort_algorithms/*.cpp src/*.cpp -o bin/app.exe

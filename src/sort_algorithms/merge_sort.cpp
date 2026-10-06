@@ -1,5 +1,5 @@
 // Implementacao do algoritmo de ordenacao mergesort
-#include "merge_sort.h"
+#include <sort_algorithms.hpp>
 
 // Função auxiliar para juntar dois subarrays ordenados
 void merge(std::vector<int>& vec, int left, int mid, int right) {

@@ -1,5 +1,5 @@
 // Implementacao do algoritmo de ordenacao insertionsort
-#include "insertion_sort.h"
+#include <sort_algorithms.hpp>
 
 // Função do insertionsort
 void insertion_sort(std::vector<int>& arr) {
