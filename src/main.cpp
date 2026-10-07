@@ -3,8 +3,6 @@
 #include <map>
 #include <string>
 #include <chrono>
-#include <random>
-#include <fstream>
 #include <write_data.hpp>
 #include <sort_algorithms.hpp>
 
@@ -13,7 +11,6 @@ using json = nlohmann::json;
 #define BASE_SAVE_PATH "/data/";
 
 int main() {
-    
     // Cabeçalho base de uma função de ordenação
     using sort_functions = void(*)(std::vector<int>&);
 
@@ -29,19 +26,13 @@ int main() {
     // Map para escrever o json
     std::map<std::string, double> data;
 
-    // Configuração para gerar números aleatórios
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis(1, 100000);
-
     // Executa cada algoritmo de ordenação e calcula o tempo de execução salvando-o em data
     for (auto const& [nome, algoritmo] : sorts) {
-        
         // Cria vetores com numeros aleatorios
-        std::vector<int> numbers(10000);
-        for (int& n : numbers) {
-            n = dis(gen);
-        }
+        //std::vector<int> numbers(10000);
+        //for (int& n : numbers) {
+        //    n = dis(gen);
+        //}
 
         // Medição de tempo
         auto start_time = std::chrono::high_resolution_clock::now();
