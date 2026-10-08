@@ -1,6 +1,5 @@
 // Implementacao do algoritmo de ordenacao coutingsort
 #include <sort_algorithms.hpp>
-#include <vector>
 
 // Função do countingsort 
 void counting_sort(std::vector<int>& arr) {
@@ -16,11 +15,13 @@ void counting_sort(std::vector<int>& arr) {
     std::vector<int> count(max_element+1, 0);
     for(int i = 0; i < n; i++) count[arr[i]]++;
 
-    //Preenche o novo vetor com os elementos na ordem
+    //Calcula a soma de prefixo
+    for(int i = 1; i < max_element; i++) count[i] += count[i-1]; 
+
+    //Preenche o novo vetor
     std::vector<int> new_array(n);
-    for(int i = 0, j = 0; i <= max_element; i++) 
-        for(int k = 0; k < count[i]; k++, j++) 
-            new_array[j] = i;
+    for(int i = n-1; i >= 0; i--) 
+        new_array[--count[arr[i]]] = arr[i];
 
     arr = new_array;
     return;

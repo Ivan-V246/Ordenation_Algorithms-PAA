@@ -1,1 +1,1 @@
-g++ -I include src/sort_algorithms/*.cpp src/*.cpp -o bin/app.exe
+g++ -I include src/sort_algorithms/*.cpp src/*.cpp src/manager_numbers/*.cpp -o bin/app.exe
