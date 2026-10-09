@@ -26,3 +26,23 @@ void gen_data(int n, std::string &save_dir){
     }
 }
 
+void write_results(std::vector<int> &numbers, std::string &save_path){
+
+    // tamanho do vector
+    int  n = numbers.size();
+
+    // cria arquivo
+    std::ofstream file(save_path);
+
+    // tenta abrir o arquivo
+    if (file.is_open()) {
+        for(int i = 0; i < n; i++){
+            file << numbers[i] << std::endl;
+        }
+
+        file.close();
+        std::cout << "Dados gravados com sucesso!" << std::endl;
+    } else {
+        std::cout << "Erro ao abrir o arquivo: " << save_path << std::endl;
+    }
+}
