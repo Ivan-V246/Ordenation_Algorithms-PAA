@@ -1,0 +1,195 @@
+% !TEX program = pdflatex
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath}
+
+\sloppy
+
+\title{Implementação e Comparação de Algoritmos de Ordenação}
+
+\author{Antônio Gemesson Sousa\inst{1}, Gleidson Luan Sena\inst{1}, Ivan Vitor Dias\inst{1}}
+
+\address{Departamento de Computação -- Universidade Federal do Piauí (UFPI)\\
+  Teresina -- PI -- Brasil
+  \email{\{autor1, autor2, ivan.oliveira\}@ufpi.edu.br}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  % Escrever em inglês, máximo 10 linhas.
+  This paper presents the implementation and experimental comparison of four
+  sorting algorithms: Insertion Sort, Merge Sort, Counting Sort and Radix Sort.
+  The algorithms are evaluated over random integer arrays of varying sizes and
+  value ranges, relating experimental results to their theoretical complexity
+  analyses.
+\end{abstract}
+
+\begin{resumo}
+  % Máximo 10 linhas.
+  Este artigo apresenta a implementação e a comparação experimental de quatro
+  algoritmos de ordenação: Insertion Sort, Merge Sort, Counting Sort e Radix
+  Sort. Os algoritmos são avaliados sobre vetores de inteiros aleatórios com
+  diferentes tamanhos e intervalos de valores, relacionando os resultados
+  experimentais às respectivas análises de complexidade teórica.
+\end{resumo}
+
+% ============================================================
+\section{Introdução}
+% ============================================================
+
+% - Contextualizar ordenação e sua importância.
+% - Diferenciar algoritmos de comparação e lineares.
+% - Apresentar o objetivo do trabalho.
+
+\section{Descrição e Análise Teórica}
+% ============================================================
+
+\subsection{Insertion Sort}
+
+O Insertion Sort é um algoritmo de ordenação por comparação que constrói a
+sequência ordenada de forma incremental, inserindo cada novo elemento na posição
+correta em relação aos elementos já ordenados. O algoritmo mantém um subvetor
+ordenado à esquerda e, a cada iteração, retira o próximo elemento não ordenado
+e o desloca para a posição correta dentro desse subvetor, movendo os elementos
+maiores uma posição à frente.
+
+\textbf{Análise de complexidade:}
+\begin{itemize}
+  \item \textbf{Melhor caso -- $O(n)$:} Ocorre quando o vetor já está ordenado.
+    Em cada iteração, o elemento corrente é maior ou igual ao último elemento do
+    subvetor ordenado, e nenhuma troca é realizada. O algoritmo executa apenas
+    as $n - 1$ comparações do laço externo.
+  \item \textbf{Caso médio -- $O(n^2)$:} Para entradas com distribuição
+    aleatória, espera-se que, em média, cada elemento precise ser deslocado
+    metade do subvetor ordenado à sua esquerda. O número de comparações e
+    deslocamentos cresce quadraticamente com $n$.
+  \item \textbf{Pior caso -- $O(n^2)$:} Ocorre quando o vetor está ordenado em
+    ordem decrescente. Cada elemento inserido precisa ser comparado e deslocado
+    em relação a todos os elementos já ordenados, resultando em $O(n^2)$
+    operações.
+\end{itemize}
+
+\subsection{Merge Sort}
+
+O Merge Sort é um algoritmo de ordenação por comparação baseado na estratégia
+de divisão e conquista. O vetor é dividido recursivamente ao meio até que cada
+subvetor contenha um único elemento (trivialmente ordenado). Em seguida, os
+subvetores são mesclados dois a dois em ordem crescente, produzindo subvetores
+cada vez maiores até que o vetor completo esteja ordenado. A etapa de mesclagem
+percorre os dois subvetores simultaneamente, copiando sempre o menor elemento
+para o vetor resultante.
+
+\textbf{Análise de complexidade:}
+\begin{itemize}
+  \item \textbf{Melhor, médio e pior caso -- $O(n \log n)$:} Independentemente
+    da distribuição inicial dos dados, o Merge Sort sempre divide o vetor em
+    duas metades e mescla os resultados. A árvore de recursão possui altura
+    $O(\log n)$ e, em cada nível, o trabalho total de mesclagem é $O(n)$.
+    Portanto, a complexidade é $O(n \log n)$ em todos os casos.
+  \item \textbf{Espaço auxiliar -- $O(n)$:} A etapa de mesclagem requer vetores
+    auxiliares para armazenar temporariamente os elementos, resultando em uso
+    de memória proporcional ao tamanho da entrada.
+\end{itemize}
+
+\subsection{Counting Sort}
+
+O Counting Sort é um algoritmo de ordenação linear que não realiza comparações
+entre elementos. Ele opera contando o número de ocorrências de cada valor
+distinto no vetor de entrada e, a partir de uma soma de prefixo sobre o vetor
+de contagem, determina a posição exata de cada elemento no vetor de saída. A
+iteração do vetor de saída de trás para frente garante a estabilidade do
+algoritmo.
+
+\textbf{Análise de complexidade:}
+\begin{itemize}
+  \item \textbf{Todos os casos -- $O(n + k)$:} onde $n$ é o número de elementos
+    e $k$ é o valor do maior elemento (o intervalo dos valores). O algoritmo
+    realiza uma passada de $O(n)$ para encontrar o máximo, uma de $O(n)$ para
+    contar as ocorrências, uma de $O(k)$ para calcular a soma de prefixo e uma
+    de $O(n)$ para reconstruir o vetor de saída.
+\end{itemize}
+
+\textbf{Parâmetros além do tamanho do vetor:}
+Ao contrário dos algoritmos de comparação, a complexidade do Counting Sort
+depende não apenas de $n$, mas também de $k$, o valor máximo presente no vetor.
+Quando $k = O(n)$, o algoritmo é efetivamente linear. Porém, quando $k$ cresce
+muito além de $n$ -- como nos intervalos $[0, 100n]$ ou $[0, 1000n]$ previstos
+nos experimentos --, o custo de $O(k)$ passa a dominar, degradando o desempenho.
+Além disso, o Counting Sort requer $O(k)$ de memória auxiliar, o que pode ser
+proibitivo para valores de $k$ muito elevados.
+
+\subsection{Radix Sort}
+
+O Radix Sort é um algoritmo de ordenação linear que ordena os elementos dígito
+a dígito, do menos significativo ao mais significativo. Em cada passada, os
+elementos são distribuídos com base no dígito corrente usando uma versão estável
+do Counting Sort (com soma de prefixo), preservando a ordem relativa de
+elementos com o mesmo dígito. A estabilidade é essencial para que as passadas
+anteriores não sejam desfeitas. O dígito na posição \texttt{exp} é extraído por
+\texttt{(arr[i] / exp) \% 10}.
+
+\textbf{Análise de complexidade:}
+\begin{itemize}
+  \item \textbf{Todos os casos -- $O(d \cdot n)$:} onde $d$ é o número de
+    dígitos do maior elemento e $n$ é o número de elementos. Cada uma das $d$
+    passadas executa em $O(n)$, pois o Counting Sort sobre dígitos de 0 a 9
+    tem $k = 10$ fixo. Como $d = O(\log k)$, a complexidade total é
+    $O(n \log k)$.
+  \item \textbf{Vantagem sobre o Counting Sort:} O Radix Sort é menos sensível
+    à magnitude dos valores, pois o custo por passada depende apenas de $n$ e
+    não de $k$ diretamente.
+\end{itemize}
+
+% ============================================================
+\section{Metodologia}
+% ============================================================
+
+% Preencher com as informações do ambiente de testes:
+Os experimentos foram conduzidos nas seguintes condições:
+
+\begin{itemize}
+  \item \textbf{Linguagem de programação e compilador:} C++, % compilador e versão
+  \item \textbf{Sistema operacional:} % ex: Ubuntu 24.04
+  \item \textbf{Processador:} % ex: Intel Core i5-1135G7, 2.4 GHz
+  \item \textbf{Memória RAM:} % ex: 8 GB DDR4 3200 MHz
+\end{itemize}
+
+Para cada algoritmo, foram utilizados vetores de inteiros gerados aleatoriamente
+com distribuição uniforme. Foram testados os seguintes tamanhos de entrada $n$:
+% ex: 1.000, 10.000, 100.000, 500.000 e 1.000.000
+
+Para cada tamanho $n$, os experimentos consideraram quatro intervalos de valores:
+$[0, n]$, $[0, 10n]$, $[0, 100n]$ e $[0, 1000n]$. Para cada combinação de $n$
+e intervalo, foram gerados 5 vetores distintos, e cada algoritmo foi executado
+5 vezes por vetor. O tempo de execução reportado corresponde à média das
+execuções. Os algoritmos foram avaliados sequencialmente, sem paralelismo.
+
+% ============================================================
+\section{Resultados e Discussão}
+% ============================================================
+
+% Inserir tabelas e/ou gráficos com os resultados.
+% Discutir:
+% - diferenças entre algoritmos de mesma categoria
+% - diferenças entre categorias (comparação vs. linear)
+% - influência do tamanho n e do intervalo de valores
+% - relação com a análise teórica
+% - quando os lineares têm vantagem ou desvantagem
+
+% ============================================================
+\section{Conclusão}
+% ============================================================
+
+% Resumir os principais achados e relacionar com os objetivos do trabalho.
+
+\bibliographystyle{sbc}
+\bibliography{sbc-template}
+
+\end{document}
