@@ -1,5 +1,5 @@
 {
-    "counting_sort": 0.45391244799999997,
+    "counting_sort": 0.431968719,
     "insertion_sort": 561.212151234,
     "merge_sort": 0.24093337399999998,
     "radix_sort": 0.076233458

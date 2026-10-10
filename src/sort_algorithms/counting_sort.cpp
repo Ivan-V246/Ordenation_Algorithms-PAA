@@ -16,7 +16,7 @@ void counting_sort(std::vector<int>& arr) {
     for(int i = 0; i < n; i++) count[arr[i]]++;
 
     //Calcula a soma de prefixo
-    for(int i = 1; i < max_element; i++) count[i] += count[i-1]; 
+    for(int i = 1; i <= max_element; i++) count[i] += count[i-1]; 
 
     //Preenche o novo vetor
     std::vector<int> new_array(n);
