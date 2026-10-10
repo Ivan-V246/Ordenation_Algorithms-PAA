@@ -14,7 +14,7 @@ std::string BASE_SAVE_PATH = "data/numbers"; // caminho base para salvar dados
 int main() {
 
     // n escolhidos 
-    int interval_n[] = {1000, 5000, 10000, 50000, 100000, 10000, 50000, 100000, 500000, 1000000};
+    int interval_n[] = {1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000};
 
     // Gera os aquivos com os dados númericos
     for(auto n: interval_n)
