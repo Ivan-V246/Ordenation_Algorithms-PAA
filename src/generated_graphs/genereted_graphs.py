@@ -48,21 +48,9 @@ if __name__ == '__main__':
 
   plt.yscale('log')
   plt.xscale('log')
-  plt.title(
-      'Desempenho dos Algoritmos de Ordenação por Tamanho (n = range)',
-      fontsize=14,
-      pad=15,
-  )
   plt.xlabel('Tamanho do Array (n) [Escala Log]', fontsize=12)
   plt.ylabel('Tempo Médio de Execução (segundos) [Escala Log]', fontsize=12)
-
-  plt.legend(
-      title='Algoritmo',
-      title_fontsize='11',
-      bbox_to_anchor=(1.02, 1),
-      loc='upper left',
-  )
-
+  plt.legend(title_fontsize='11')
   plt.tight_layout()
   plt.savefig(
       path_save_graph / 'comparativo_crescimento.png',
@@ -90,21 +78,9 @@ if __name__ == '__main__':
 
     plt.yscale('log')
     plt.xscale('log')
-    plt.title(
-        f'Impacto do Range dos Valores (k) no Tempo (Para n = {fixed_n:,})',
-        fontsize=14,
-        pad=15,
-    )
     plt.xlabel('Range dos Valores (k) [Escala Log]', fontsize=12)
     plt.ylabel('Tempo Médio de Execução (segundos) [Escala Log]', fontsize=12)
-
-    plt.legend(
-        title='Algoritmo',
-        title_fontsize='11',
-        bbox_to_anchor=(1.02, 1),
-        loc='upper left',
-    )
-
+    plt.legend(title_fontsize='11')
     plt.tight_layout()
     filename = f'impacto_range_n_{fixed_n}.png'
     plt.savefig(
@@ -131,11 +107,6 @@ if __name__ == '__main__':
       cbar_kws={'label': 'Tempo (s) - Escala Log'},
   )
 
-  plt.title(
-      'Mapa de Calor: Tempo de Execução do Counting Sort (n vs Range)',
-      fontsize=14,
-      pad=15,
-  )
   plt.xlabel('Tamanho do Array (n)', fontsize=12)
   plt.ylabel('Range dos Valores (k)', fontsize=12)
   plt.tight_layout()
@@ -163,28 +134,16 @@ if __name__ == '__main__':
       palette=['#fc8d62']
   )
 
-  plt.title(
-      'Forma da Função de Tempo: Insertion Sort',
-      fontsize=14,
-      pad=15,
-  )
   plt.xlabel('Tamanho do Array (n)', fontsize=12)
   plt.ylabel('Tempo de Execução (segundos)', fontsize=12)
   
-  # Aplica notação científica baseada em potências no eixo X
   ax = plt.gca()
   formatter = ticker.ScalarFormatter(useMathText=True)
   formatter.set_scientific(True)
   formatter.set_powerlimits((0, 0))
   ax.xaxis.set_major_formatter(formatter)
 
-  plt.legend(
-      title='Algoritmo',
-      title_fontsize='11',
-      #bbox_to_anchor=(1.02, 1),
-      #loc='upper left',
-  )
-
+  plt.legend(title_fontsize='11')
   plt.tight_layout()
   plt.savefig(
       path_save_graph / 'escala_real_insertion_sort.png',
@@ -210,31 +169,51 @@ if __name__ == '__main__':
       linewidth=2.5,
   )
 
-  plt.title(
-      'Forma da Função de Tempo: Merge, Radix e Counting Sort',
-      fontsize=14,
-      pad=15,
-  )
   plt.xlabel('Tamanho do Array (n)', fontsize=12)
   plt.ylabel('Tempo de Execução (segundos)', fontsize=12)
 
-  # Aplica notação científica baseada em potências no eixo X
   ax = plt.gca()
   formatter = ticker.ScalarFormatter(useMathText=True)
   formatter.set_scientific(True)
   formatter.set_powerlimits((0, 0))
   ax.xaxis.set_major_formatter(formatter)
 
-  plt.legend(
-      title='Algoritmo',
-      title_fontsize='11',
-      #bbox_to_anchor=(1.02, 1),
-      #loc='upper left',
-  )
-
+  plt.legend(title_fontsize='11')
   plt.tight_layout()
   plt.savefig(
       path_save_graph / 'escala_real_nlog_lineares.png',
+      dpi=300,
+      bbox_inches='tight',
+  )
+  plt.show()
+  plt.close()
+
+  # ==========================================
+  # GRÁFICO 6: Média Geral por n (Desconsiderando os diferentes ranges) [Log-Log]
+  # ==========================================
+  plt.figure(figsize=(10, 6))
+  
+  # Agrupa valores de acordo com o n
+  df_mean_by_n = df.groupby(['n', 'algorithm'])['time'].mean().reset_index()
+
+  sns.lineplot(
+      data=df_mean_by_n,
+      x='n',
+      y='time',
+      hue='algorithm',
+      marker='o',
+      linewidth=2.5,
+  )
+
+  plt.yscale('log')
+  plt.xscale('log')
+  plt.xlabel('Tamanho do Array (n) [Escala Log - Média de Todos os Ranges]', fontsize=12)
+  plt.ylabel('Tempo Médio Geral de Execução (segundos) [Escala Log]', fontsize=12)
+  
+  plt.legend(title='Algoritmo', title_fontsize='11')
+  plt.tight_layout()
+  plt.savefig(
+      path_save_graph / 'comparativo_media_geral_n.png',
       dpi=300,
       bbox_inches='tight',
   )
