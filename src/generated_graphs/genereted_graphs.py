@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from manager_data import read_json
 import pandas as pd
 import seaborn as sns
@@ -28,8 +29,10 @@ if __name__ == '__main__':
   sns.set_theme(style='whitegrid')
   plt.rcParams.update({'font.size': 11})
 
+  all_ns = sorted(df['n'].unique())
+
   # ==========================================
-  # GRÁFICO 1: Curvas de Crescimento (n == range)
+  # GRÁFICO 1: Curvas de Crescimento (n == range) [Log-Log]
   # ==========================================
   plt.figure(figsize=(10, 6))
   df_growth = df[df['n'] == df['range']]
@@ -67,13 +70,12 @@ if __name__ == '__main__':
       bbox_inches='tight',
   )
   plt.show()
+  plt.close()
 
   # ==========================================
-  # GRÁFICO 2: Impacto do Range (k) para n Fixo
+  # GRÁFICO 2: Impacto do Range (k) para n Fixo [Log-Log]
   # ==========================================
-  unique_ns = sorted(df['n'].unique())
-
-  for fixed_n in unique_ns:
+  for fixed_n in all_ns:
     df_range_impact = df[df['n'] == fixed_n]
 
     plt.figure(figsize=(10, 6))
@@ -104,9 +106,7 @@ if __name__ == '__main__':
     )
 
     plt.tight_layout()
-
     filename = f'impacto_range_n_{fixed_n}.png'
-
     plt.savefig(
         path_save_graph / filename, dpi=300, bbox_inches='tight'
     )
@@ -145,3 +145,98 @@ if __name__ == '__main__':
       bbox_inches='tight',
   )
   plt.show()
+  plt.close()
+
+  # ==========================================
+  # GRÁFICO 4: Escala Real (Linear) - Insertion Sort
+  # ==========================================
+  plt.figure(figsize=(10, 6))
+  df_insertion = df[(df['algorithm'] == 'insertion_sort') & (df['n'] == df['range'])]
+
+  sns.lineplot(
+      data=df_insertion,
+      x='n',
+      y='time',
+      hue='algorithm',
+      marker='o',
+      linewidth=2.5,
+      palette=['#fc8d62']
+  )
+
+  plt.title(
+      'Forma da Função de Tempo: Insertion Sort',
+      fontsize=14,
+      pad=15,
+  )
+  plt.xlabel('Tamanho do Array (n)', fontsize=12)
+  plt.ylabel('Tempo de Execução (segundos)', fontsize=12)
+  
+  # Aplica notação científica baseada em potências no eixo X
+  ax = plt.gca()
+  formatter = ticker.ScalarFormatter(useMathText=True)
+  formatter.set_scientific(True)
+  formatter.set_powerlimits((0, 0))
+  ax.xaxis.set_major_formatter(formatter)
+
+  plt.legend(
+      title='Algoritmo',
+      title_fontsize='11',
+      #bbox_to_anchor=(1.02, 1),
+      #loc='upper left',
+  )
+
+  plt.tight_layout()
+  plt.savefig(
+      path_save_graph / 'escala_real_insertion_sort.png',
+      dpi=300,
+      bbox_inches='tight',
+  )
+  plt.show()
+  plt.close()
+
+  # ==========================================
+  # GRÁFICO 5: Escala Real (Linear) - Merge, Radix e Counting Sort
+  # ==========================================
+  plt.figure(figsize=(10, 6))
+  algos_proximos = ['merge_sort', 'radix_sort', 'counting_sort']
+  df_fast = df[(df['algorithm'].isin(algos_proximos)) & (df['n'] == df['range'])]
+
+  sns.lineplot(
+      data=df_fast,
+      x='n',
+      y='time',
+      hue='algorithm',
+      marker='o',
+      linewidth=2.5,
+  )
+
+  plt.title(
+      'Forma da Função de Tempo: Merge, Radix e Counting Sort',
+      fontsize=14,
+      pad=15,
+  )
+  plt.xlabel('Tamanho do Array (n)', fontsize=12)
+  plt.ylabel('Tempo de Execução (segundos)', fontsize=12)
+
+  # Aplica notação científica baseada em potências no eixo X
+  ax = plt.gca()
+  formatter = ticker.ScalarFormatter(useMathText=True)
+  formatter.set_scientific(True)
+  formatter.set_powerlimits((0, 0))
+  ax.xaxis.set_major_formatter(formatter)
+
+  plt.legend(
+      title='Algoritmo',
+      title_fontsize='11',
+      #bbox_to_anchor=(1.02, 1),
+      #loc='upper left',
+  )
+
+  plt.tight_layout()
+  plt.savefig(
+      path_save_graph / 'escala_real_nlog_lineares.png',
+      dpi=300,
+      bbox_inches='tight',
+  )
+  plt.show()
+  plt.close()
