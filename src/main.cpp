@@ -9,17 +9,22 @@
 
 using json = nlohmann::json;
 
-std::string BASE_SAVE_PATH = "data/numbers"; // caminho base para salvar dados
+std::string BASE_SAVE_PATH = "data/numbers/numbers"; // caminho base para salvar dados
 
 int main() {
 
     // n escolhidos 
-    int interval_n[] = {1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000};
+    int interval_n[] = {1000, 5000, 10000, 50000, 100000};
 
     // Gera os aquivos com os dados númericos
-    for(auto n: interval_n)
-    {
-        gen_data(n, BASE_SAVE_PATH);
+
+    for(int i = 0; i < 5; i++){
+        std::string dir = BASE_SAVE_PATH + std::to_string(i + 1);
+
+        for(auto n: interval_n)
+        {
+            gen_data(n, dir);
+        }
     }
 
     // // Cabeçalho base de uma função de ordenação
@@ -33,53 +38,56 @@ int main() {
         {"counting_sort", counting_sort}
     };
 
-    for(int i = 0; i < 5; i++){
+    for(int k = 0; k < 5; k++){
+        std::string dir = BASE_SAVE_PATH + std::to_string(k + 1);
 
-        for(auto n: interval_n){
+        for(int i = 0; i < 5; i++){
+            for(auto n: interval_n){
 
-            for(int j = 1; j <= 1000; j *= 10){ 
+                for(int j = 1; j <= 1000; j *= 10){ 
 
-                // Map para escrever o json
-                std::map<std::string, double> data = {};
+                    // Map para escrever o json
+                    std::map<std::string, double> data = {};
 
-                // Executa cada algoritmo de ordenação e calcula o tempo de execução salvando-o em data
-                for (auto const& [nome, algoritmo] : sorts) {
-                    std::vector<int> numbers = {};
+                    // Executa cada algoritmo de ordenação e calcula o tempo de execução salvando-o em data
+                    for (auto const& [nome, algoritmo] : sorts) {
+                        std::vector<int> numbers = {};
 
-                    read_data(numbers, BASE_SAVE_PATH, n, n * j); // ler cada arquivo com os dados numericos
-                
-                    // Medição de tempo
-                    auto start_time = std::chrono::high_resolution_clock::now();
-
-                    algoritmo(numbers); // Executa o algoritmo de ordenação atual do loop
-
-                    auto end_time = std::chrono::high_resolution_clock::now();
+                        read_data(numbers, dir, n, n * j); // ler cada arquivo com os dados numericos
                     
-                    auto duration = std::chrono::duration<double, std::milli>(end_time - start_time);
-                    double execution_time = duration.count() / 1000.0; // Convertendo para segundos
-                    
-                    // Salva o tempo correspondente de cada algoritmo em segundos
-                    data[nome] = execution_time; 
-                    
-                    std::cout << nome << " executado em: " << execution_time << " s\n";
-                    
-                    // caminho para salvar os resultados da ordenação
-                    std::string save_path_results = "data/results/data" "_" + std::to_string(n) + "-" + std::to_string(j*n) + "_teste_" + std::to_string(i) + "_" + nome + ".txt";
-                    write_results(numbers, save_path_results);
-                }
+                        // Medição de tempo
+                        auto start_time = std::chrono::high_resolution_clock::now();
 
-                // caminho para salvar os dados de tempo
-                std::string save_path = "data/times/data" "_" + std::to_string(n) + "-" + std::to_string(j*n) + "_teste" + std::to_string(i) + ".json";
-                
-                // salva dados no arquivo JSON
-                bool response = write_json(save_path, data);
+                        algoritmo(numbers); // Executa o algoritmo de ordenação atual do loop
 
-                if (response) {
-                    std::cout << "\nDados escritos com sucesso em " << save_path << std::endl;
-                } else {
-                    std::cout << "\nErro ao escrever dados!" << std::endl;
-                }
-            }   
+                        auto end_time = std::chrono::high_resolution_clock::now();
+                        
+                        auto duration = std::chrono::duration<double, std::milli>(end_time - start_time);
+                        double execution_time = duration.count() / 1000.0; // Convertendo para segundos
+                        
+                        // Salva o tempo correspondente de cada algoritmo em segundos
+                        data[nome] = execution_time; 
+                        
+                        std::cout << nome << " executado em: " << execution_time << " s\n";
+                        
+                        // caminho para salvar os resultados da ordenação
+                        std::string save_path_results = "data/results/data" + std::to_string(k + 1) + "/data" "_" + std::to_string(n) + "-" + std::to_string(j*n) + "_teste_" + std::to_string(i) + "_" + nome + ".txt";
+                        write_results(numbers, save_path_results);
+                    }
+
+                    // caminho para salvar os dados de tempo
+                    std::string save_path = "data/times/data" + std::to_string(k + 1) + "/data" "_" + std::to_string(n) + "-" + std::to_string(j*n) + "_teste" + std::to_string(i) + ".json";
+                    
+                    // salva dados no arquivo JSON
+                    bool response = write_json(save_path, data);
+
+                    if (response) {
+                        std::cout << "\nDados escritos com sucesso em " << save_path << std::endl;
+                    } else {
+                        std::cout << "\nErro ao escrever dados!Em: "  << save_path<< std::endl;
+                    }
+                }   
+            }
         }
     }
 
