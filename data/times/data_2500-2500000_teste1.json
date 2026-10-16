@@ -1,6 +1,0 @@
-{
-    "counting_sort": 0.015751222,
-    "insertion_sort": 0.011990247,
-    "merge_sort": 0.00076365,
-    "radix_sort": 0.00028751700000000005
-}

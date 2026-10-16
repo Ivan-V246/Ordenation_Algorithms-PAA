@@ -2,20 +2,33 @@
 \documentclass[12pt]{article}
 
 \usepackage{sbc-template}
-\usepackage{graphicx,url}
+\usepackage{graphicx}
+\usepackage[hyphens]{url}
+\urlstyle{same}
 \usepackage[utf8]{inputenc}
 \usepackage[brazilian]{babel}
 \usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{subcaption}
 
 \sloppy
 
+% Ajustes para o LaTeX aproveitar melhor o espaço com figuras
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.8}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
 \title{Implementação e Comparação de Algoritmos de Ordenação}
 
-\author{Antônio Gemesson Sousa\inst{1}, Gleidson Luan Sena\inst{1}, Ivan Vitor Dias\inst{1}}
+\author{Antônio Gemesson Sousa de Oliveira\inst{1}, Gleidson Luan Sena Alves\inst{1}, \\ Ivan Vitor Dias de Oliveira\inst{1}}
 
 \address{Departamento de Computação -- Universidade Federal do Piauí (UFPI)\\
   Teresina -- PI -- Brasil
-  \email{\{autor1, autor2, ivan.oliveira\}@ufpi.edu.br}
+  \email{\{antonio.gemesson, gleidson.alves, ivan.oliveira\}@ufpi.edu.br}
 }
 
 \begin{document}
@@ -23,57 +36,84 @@
 \maketitle
 
 \begin{abstract}
-  % Escrever em inglês, máximo 10 linhas.
   This paper presents the implementation and experimental comparison of four
   sorting algorithms: Insertion Sort, Merge Sort, Counting Sort and Radix Sort.
   The algorithms are evaluated over random integer arrays of varying sizes and
   value ranges, relating experimental results to their theoretical complexity
-  analyses.
+  analyses. Counting Sort was the fastest when the value range is close to the
+  input size ($k \approx n$), but it degrades as $k$ grows; Radix Sort was the
+  most robust to the value range, and Insertion Sort proved unfeasible for
+  $n = 10^5$.
 \end{abstract}
 
 \begin{resumo}
-  % Máximo 10 linhas.
   Este artigo apresenta a implementação e a comparação experimental de quatro
-  algoritmos de ordenação: Insertion Sort, Merge Sort, Counting Sort e Radix
-  Sort. Os algoritmos são avaliados sobre vetores de inteiros aleatórios com
-  diferentes tamanhos e intervalos de valores, relacionando os resultados
-  experimentais às respectivas análises de complexidade teórica.
+  algoritmos de ordenação: Insertion Sort, Merge Sort, Counting Sort e
+  Radix Sort. Os algoritmos são avaliados sobre vetores de inteiros aleatórios
+  com diferentes tamanhos e intervalos de valores, relacionando os resultados
+  experimentais às respectivas análises de complexidade teórica. O Counting
+  Sort foi o mais rápido quando o intervalo de valores é próximo do tamanho do
+  vetor ($k \approx n$), mas degrada-se à medida que $k$ cresce; o Radix Sort
+  foi o mais robusto em relação a $k$, e o Insertion Sort mostrou-se inviável
+  para $n = 10^5$.
 \end{resumo}
 
 % ============================================================
 \section{Introdução}
 % ============================================================
 
-% - Contextualizar ordenação e sua importância.
-% - Diferenciar algoritmos de comparação e lineares.
-% - Apresentar o objetivo do trabalho.
+A ordenação de dados é um dos problemas fundamentais da ciência da
+computação. Ela está presente em tarefas como a organização de registros em
+bancos de dados, a busca eficiente em estruturas ordenadas e a preparação de
+dados para outros algoritmos. Por isso, a escolha do algoritmo de ordenação
+mais adequado pode ter impacto direto no desempenho de uma aplicação.
 
+Os algoritmos de ordenação podem ser divididos em duas grandes classes. Os
+algoritmos baseados em comparação, como o Insertion Sort~\cite{gfg-insertion}
+e o Merge Sort~\cite{gfg-merge}, decidem a posição dos elementos comparando-os
+entre si e, por isso, estão sujeitos ao limite inferior de $\Omega(n \log n)$
+comparações no pior caso~\cite{cormen2012}. Já os algoritmos lineares, como o
+Counting Sort~\cite{gfg-counting} e o Radix Sort~\cite{gfg-radix}, não
+comparam elementos: eles exploram a estrutura numérica das chaves, o que
+permite tempo linear sob certas condições, em geral relacionadas ao intervalo
+de valores a serem ordenados.
+
+Neste contexto, o objetivo deste trabalho é implementar e comparar
+experimentalmente quatro algoritmos de ordenação (Insertion Sort, Merge
+Sort, Counting Sort e Radix Sort), relacionando o desempenho observado às
+respectivas análises de complexidade teórica. Os algoritmos são avaliados
+sobre vetores de inteiros aleatórios, variando tanto o tamanho $n$ da entrada
+quanto o intervalo de valores $k$, a fim de investigar em que condições cada
+abordagem é mais vantajosa.
+
+% ============================================================
 \section{Descrição e Análise Teórica}
+\label{sec:teoria}
 % ============================================================
 
 \subsection{Insertion Sort}
 
 O Insertion Sort é um algoritmo de ordenação por comparação que constrói a
-sequência ordenada de forma incremental, inserindo cada novo elemento na posição
-correta em relação aos elementos já ordenados. O algoritmo mantém um subvetor
-ordenado à esquerda e, a cada iteração, retira o próximo elemento não ordenado
-e o desloca para a posição correta dentro desse subvetor, movendo os elementos
-maiores uma posição à frente.
+sequência ordenada de forma incremental, inserindo cada novo elemento na
+posição correta em relação aos elementos já ordenados. O algoritmo mantém um
+subvetor ordenado à esquerda e, a cada iteração, retira o próximo elemento
+não ordenado e o desloca para a posição correta dentro desse subvetor,
+movendo os elementos maiores uma posição à frente~\cite{gfg-insertion}.
 
 \textbf{Análise de complexidade:}
 \begin{itemize}
-  \item \textbf{Melhor caso -- $O(n)$:} Ocorre quando o vetor já está ordenado.
-    Em cada iteração, o elemento corrente é maior ou igual ao último elemento do
-    subvetor ordenado, e nenhuma troca é realizada. O algoritmo executa apenas
-    as $n - 1$ comparações do laço externo.
+  \item \textbf{Melhor caso -- $O(n)$:} Ocorre quando o vetor já está
+    ordenado. Em cada iteração, o elemento corrente é maior ou igual ao
+    último elemento do subvetor ordenado, e nenhuma troca é realizada. O
+    algoritmo executa apenas as $n - 1$ comparações do laço externo.
   \item \textbf{Caso médio -- $O(n^2)$:} Para entradas com distribuição
     aleatória, espera-se que, em média, cada elemento precise ser deslocado
     metade do subvetor ordenado à sua esquerda. O número de comparações e
     deslocamentos cresce quadraticamente com $n$.
-  \item \textbf{Pior caso -- $O(n^2)$:} Ocorre quando o vetor está ordenado em
-    ordem decrescente. Cada elemento inserido precisa ser comparado e deslocado
-    em relação a todos os elementos já ordenados, resultando em $O(n^2)$
-    operações.
+  \item \textbf{Pior caso -- $O(n^2)$:} Ocorre quando o vetor está ordenado
+    em ordem decrescente. Cada elemento inserido precisa ser comparado e
+    deslocado em relação a todos os elementos já ordenados, resultando em
+    $O(n^2)$ operações.
 \end{itemize}
 
 \subsection{Merge Sort}
@@ -82,112 +122,482 @@ O Merge Sort é um algoritmo de ordenação por comparação baseado na estraté
 de divisão e conquista. O vetor é dividido recursivamente ao meio até que cada
 subvetor contenha um único elemento (trivialmente ordenado). Em seguida, os
 subvetores são mesclados dois a dois em ordem crescente, produzindo subvetores
-cada vez maiores até que o vetor completo esteja ordenado. A etapa de mesclagem
-percorre os dois subvetores simultaneamente, copiando sempre o menor elemento
-para o vetor resultante.
+cada vez maiores até que o vetor completo esteja ordenado. A etapa de
+mesclagem percorre os dois subvetores simultaneamente, copiando sempre o
+menor elemento para o vetor resultante~\cite{gfg-merge}.
 
 \textbf{Análise de complexidade:}
 \begin{itemize}
-  \item \textbf{Melhor, médio e pior caso -- $O(n \log n)$:} Independentemente
-    da distribuição inicial dos dados, o Merge Sort sempre divide o vetor em
-    duas metades e mescla os resultados. A árvore de recursão possui altura
-    $O(\log n)$ e, em cada nível, o trabalho total de mesclagem é $O(n)$.
-    Portanto, a complexidade é $O(n \log n)$ em todos os casos.
-  \item \textbf{Espaço auxiliar -- $O(n)$:} A etapa de mesclagem requer vetores
-    auxiliares para armazenar temporariamente os elementos, resultando em uso
-    de memória proporcional ao tamanho da entrada.
+  \item \textbf{Melhor, médio e pior caso -- $O(n \log n)$:}
+    Independentemente da distribuição inicial dos dados, o Merge Sort sempre
+    divide o vetor em duas metades e mescla os resultados. A árvore de
+    recursão possui altura $O(\log n)$ e, em cada nível, o trabalho total
+    de mesclagem é $O(n)$. Portanto, a complexidade é $O(n \log n)$ em
+    todos os casos.
+  \item \textbf{Espaço auxiliar -- $O(n)$:} A etapa de mesclagem requer
+    vetores auxiliares para armazenar temporariamente os elementos,
+    resultando em uso de memória proporcional ao tamanho da entrada.
 \end{itemize}
 
 \subsection{Counting Sort}
 
-O Counting Sort é um algoritmo de ordenação linear que não realiza comparações
-entre elementos. Ele opera contando o número de ocorrências de cada valor
-distinto no vetor de entrada e, a partir de uma soma de prefixo sobre o vetor
-de contagem, determina a posição exata de cada elemento no vetor de saída. A
-iteração do vetor de saída de trás para frente garante a estabilidade do
-algoritmo.
+O Counting Sort é um algoritmo de ordenação linear que não realiza
+comparações entre elementos. Ele opera contando o número de ocorrências de
+cada valor distinto no vetor de entrada e, a partir de uma soma de prefixo
+sobre o vetor de contagem, determina a posição exata de cada elemento no
+vetor de saída. A iteração do vetor de saída de trás para frente garante a
+estabilidade do algoritmo~\cite{gfg-counting}.
 
 \textbf{Análise de complexidade:}
 \begin{itemize}
-  \item \textbf{Todos os casos -- $O(n + k)$:} onde $n$ é o número de elementos
-    e $k$ é o valor do maior elemento (o intervalo dos valores). O algoritmo
-    realiza uma passada de $O(n)$ para encontrar o máximo, uma de $O(n)$ para
-    contar as ocorrências, uma de $O(k)$ para calcular a soma de prefixo e uma
-    de $O(n)$ para reconstruir o vetor de saída.
+  \item \textbf{Todos os casos -- $O(n + k)$:} onde $n$ é o número de
+    elementos e $k$ é o valor do maior elemento, isto é, o limite superior
+    do intervalo de valores (ver Seção~\ref{sec:metodologia}).
+    O algoritmo realiza uma passada de $O(n)$ para encontrar o máximo, uma
+    de $O(n)$ para contar as ocorrências, uma de $O(k)$ para calcular a
+    soma de prefixo e uma de $O(n)$ para reconstruir o vetor de saída.
 \end{itemize}
 
 \textbf{Parâmetros além do tamanho do vetor:}
 Ao contrário dos algoritmos de comparação, a complexidade do Counting Sort
-depende não apenas de $n$, mas também de $k$, o valor máximo presente no vetor.
-Quando $k = O(n)$, o algoritmo é efetivamente linear. Porém, quando $k$ cresce
-muito além de $n$ -- como nos intervalos $[0, 100n]$ ou $[0, 1000n]$ previstos
-nos experimentos --, o custo de $O(k)$ passa a dominar, degradando o desempenho.
-Além disso, o Counting Sort requer $O(k)$ de memória auxiliar, o que pode ser
-proibitivo para valores de $k$ muito elevados.
+depende não apenas de $n$, mas também de $k$. Quando $k = O(n)$, o algoritmo
+é efetivamente linear. Porém, quando $k$ cresce muito além de $n$ (como nos
+intervalos $[1, 100n]$ e $[1, 1000n]$ previstos nos experimentos), o custo de
+$O(k)$ passa a dominar, degradando o desempenho. Além disso, o Counting Sort
+requer $O(k)$ de memória auxiliar, o que pode ser proibitivo para valores de
+$k$ muito elevados.
 
 \subsection{Radix Sort}
 
-O Radix Sort é um algoritmo de ordenação linear que ordena os elementos dígito
-a dígito, do menos significativo ao mais significativo. Em cada passada, os
-elementos são distribuídos com base no dígito corrente usando uma versão estável
-do Counting Sort (com soma de prefixo), preservando a ordem relativa de
-elementos com o mesmo dígito. A estabilidade é essencial para que as passadas
-anteriores não sejam desfeitas. O dígito na posição \texttt{exp} é extraído por
-\texttt{(arr[i] / exp) \% 10}.
+O Radix Sort é um algoritmo de ordenação linear que ordena os elementos
+dígito a dígito, do menos significativo ao mais significativo. Em cada
+passada, os elementos são distribuídos com base no dígito corrente usando
+uma versão estável do Counting Sort (com soma de prefixo), preservando a
+ordem relativa de elementos com o mesmo dígito. A estabilidade é essencial
+para que as passadas anteriores não sejam desfeitas. O dígito na posição
+\texttt{exp} é extraído por \texttt{(arr[i] / exp) \% 10}~\cite{gfg-radix}.
 
 \textbf{Análise de complexidade:}
 \begin{itemize}
   \item \textbf{Todos os casos -- $O(d \cdot n)$:} onde $d$ é o número de
-    dígitos do maior elemento e $n$ é o número de elementos. Cada uma das $d$
-    passadas executa em $O(n)$, pois o Counting Sort sobre dígitos de 0 a 9
-    tem $k = 10$ fixo. Como $d = O(\log k)$, a complexidade total é
-    $O(n \log k)$.
-  \item \textbf{Vantagem sobre o Counting Sort:} O Radix Sort é menos sensível
-    à magnitude dos valores, pois o custo por passada depende apenas de $n$ e
-    não de $k$ diretamente.
+    dígitos do maior elemento e $n$ é o número de elementos. Cada uma das
+    $d$ passadas executa em $O(n)$, pois o Counting Sort sobre dígitos de
+    0 a 9 usa um vetor de contagem de tamanho fixo (10 posições). Como
+    $d = O(\log k)$, a complexidade total é $O(n \log k)$.
+  \item \textbf{Vantagem sobre o Counting Sort:} O Radix Sort é menos
+    sensível à magnitude dos valores, pois o custo por passada depende
+    apenas de $n$ e não de $k$ diretamente.
 \end{itemize}
 
 % ============================================================
 \section{Metodologia}
+\label{sec:metodologia}
 % ============================================================
 
-% Preencher com as informações do ambiente de testes:
-Os experimentos foram conduzidos nas seguintes condições:
+Os algoritmos foram implementados em C++ e operam sobre vetores de inteiros
+(\texttt{std::vector<int>}). Os experimentos foram conduzidos nas seguintes
+condições:
 
 \begin{itemize}
-  \item \textbf{Linguagem de programação e compilador:} C++, % compilador e versão
-  \item \textbf{Sistema operacional:} % ex: Ubuntu 24.04
-  \item \textbf{Processador:} % ex: Intel Core i5-1135G7, 2.4 GHz
-  \item \textbf{Memória RAM:} % ex: 8 GB DDR4 3200 MHz
+  \item \textbf{Linguagem de programação e compilador:} C++ e gcc
+    version 15.3.1 (Red Hat 15.3.1-1), compilado sem flags de otimização
+    (nível padrão do gcc, equivalente a \texttt{-O0}).
+  \item \textbf{Sistema operacional:} Linux Fedora.
+  \item \textbf{Processador:} Intel Core i5-13420H de 13ª geração.
+  \item \textbf{Memória RAM:} 8\,GB DDR5 5200\,MHz.
 \end{itemize}
 
-Para cada algoritmo, foram utilizados vetores de inteiros gerados aleatoriamente
-com distribuição uniforme. Foram testados os seguintes tamanhos de entrada $n$:
-% ex: 1.000, 10.000, 100.000, 500.000 e 1.000.000
+Foram testados os seguintes tamanhos de entrada $n$: $1\,000$, $5\,000$,
+$10\,000$, $50\,000$ e $100\,000$. Para cada $n$, os valores dos vetores foram
+sorteados com distribuição uniforme discreta, usando o gerador
+\texttt{std::mt19937} inicializado com \texttt{std::random\_device}.
 
-Para cada tamanho $n$, os experimentos consideraram quatro intervalos de valores:
-$[0, n]$, $[0, 10n]$, $[0, 100n]$ e $[0, 1000n]$. Para cada combinação de $n$
-e intervalo, foram gerados 5 vetores distintos, e cada algoritmo foi executado
-5 vezes por vetor. O tempo de execução reportado corresponde à média das
-execuções. Os algoritmos foram avaliados sequencialmente, sem paralelismo.
+Denota-se por $k$ o limite superior do intervalo de valores: os elementos são
+sorteados em $[1, k]$, e os quatro intervalos testados correspondem a
+$k = n$, $k = 10n$, $k = 100n$ e $k = 1000n$. Esse parâmetro afeta
+diretamente o Counting Sort e, indiretamente, o Radix Sort, por meio do
+número de dígitos $d$.
+
+Para cada combinação de $n$ e $k$, foram gerados 5 vetores distintos, gravados
+em arquivo, de modo que os quatro algoritmos ordenam exatamente a mesma
+entrada. Cada algoritmo foi executado 5 vezes por vetor (25 execuções por
+combinação), lendo o vetor do arquivo a cada execução, e o tempo reportado
+corresponde à média dessas 25 execuções. Como a semente do gerador é obtida
+de \texttt{std::random\_device}, os vetores gerados não são reproduzíveis entre
+execuções do programa.
+
+O tempo foi medido com \texttt{std::chrono::high\_resolution\_clock}, imediatamente
+antes e depois da chamada da função de ordenação. Assim, a leitura do arquivo
+e a gravação do resultado não entram na medição, mas a alocação de memória
+auxiliar feita pelo próprio algoritmo (como o vetor de contagem do Counting
+Sort) é contabilizada. Os algoritmos foram avaliados sequencialmente, sem
+paralelismo.
 
 % ============================================================
 \section{Resultados e Discussão}
+\label{sec:resultados}
 % ============================================================
 
-% Inserir tabelas e/ou gráficos com os resultados.
-% Discutir:
-% - diferenças entre algoritmos de mesma categoria
-% - diferenças entre categorias (comparação vs. linear)
-% - influência do tamanho n e do intervalo de valores
-% - relação com a análise teórica
-% - quando os lineares têm vantagem ou desvantagem
+Os resultados são apresentados em quatro etapas: panorama em escala log-log
+(Seção~\ref{subsec:loglog}), curvas em escala linear
+(Seção~\ref{subsec:linear}), sensibilidade ao intervalo de valores~$k$
+(Seção~\ref{subsec:range}) e mapa de calor do \textit{Counting Sort}
+(Seção~\ref{subsec:heatmap}).
+
+% -------------------------------------------------------------------
+\subsection{Panorama Global: Crescimento Assintótico em Escala Log-Log}
+\label{subsec:loglog}
+% -------------------------------------------------------------------
+
+As Figuras~\ref{fig:loglog_kn} e~\ref{fig:loglog_media} comparam o tempo
+médio dos quatro algoritmos em escala log-log, para $n$ de $10^{3}$ a
+$10^{5}$, em dois cenários quanto à relação entre $n$ e $k$. A escala
+log-log acomoda a variação de quase seis ordens de grandeza no tempo (de
+${\approx}\,2{,}5 \times 10^{-5}$\,s a ${\approx}\,19{,}7$\,s).
+
+\subsubsection{Cenário 1: $k = n$}
+
+Quando $k = n$, cada algoritmo opera em seu regime teórico mais
+representativo, e uma complexidade $T(n) = \Theta(n^{\alpha})$ aparece como
+uma reta de inclinação~$\alpha$ (Figura~\ref{fig:loglog_kn}).
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.75\columnwidth]{Images/comparativo_crescimento.png}
+  \caption{Tempo médio de execução em escala log-log com $k = n$, para
+           $n \in \{10^3, 5 \times 10^3, 10^4, 5 \times 10^4, 10^5\}$.}
+  \label{fig:loglog_kn}
+\end{figure}
+
+% TODO (opcional): informar as inclinações medidas (regressão linear em
+% log-log) no lugar de "próxima de 2,0" e "próxima de 1,0".
+Os resultados alinham-se com a teoria: o \textit{Insertion Sort} tem
+inclinação próxima de $2{,}0$ ($\Theta(n^{2})$); o \textit{Merge Sort},
+ligeiramente superior a $1{,}0$ ($\Theta(n \log n)$); e o
+\textit{Counting Sort} e o \textit{Radix Sort}, próxima de $1{,}0$
+(linearidade quando $k = \mathcal{O}(n)$). Para $n = 10^{5}$, a ordem é:
+\textit{Counting Sort} (${\approx}\,2{,}3 \times 10^{-3}$\,s),
+\textit{Radix Sort} (${\approx}\,8{,}7 \times 10^{-3}$\,s),
+\textit{Merge Sort} (${\approx}\,4{,}0 \times 10^{-2}$\,s) e
+\textit{Insertion Sort} (${\approx}\,19{,}7$\,s), uma diferença de
+aproximadamente quatro ordens de grandeza entre o mais rápido e o mais lento.
+O \textit{Radix Sort} fica entre o \textit{Counting Sort} e o \textit{Merge
+Sort} porque, com $k = n$, o número de dígitos $d = \mathcal{O}(\log n)$
+deixa de ser desprezível, afastando-o do \textit{Counting Sort} à medida que
+$n$ cresce.
+
+\subsubsection{Cenário 2: média sobre todos os intervalos de $k$}
+
+A Figura~\ref{fig:loglog_media} apresenta, para cada $n$, a média do tempo
+sobre os quatro intervalos testados ($[1, n]$ a $[1, 1000n]$), agregando
+desde condições favoráveis ($k = n$) até adversas ($k = 1000n$), o que se
+aproxima de aplicações reais, em que o intervalo dos dados raramente é
+controlado.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.75\columnwidth]{Images/comparativo_media_geral_n.png}
+  \caption{Tempo médio geral de execução em escala log-log, calculado
+           como a média sobre todos os intervalos de valores testados
+           para cada~$n$. A elevação da curva do \textit{Counting Sort}
+           evidencia sua sensibilidade ao parâmetro~$k$.}
+  \label{fig:loglog_media}
+\end{figure}
+
+Os algoritmos baseados em comparação (\textit{Insertion Sort} e
+\textit{Merge Sort}) têm curvas inalteradas entre os cenários, pois suas
+complexidades dependem apenas de~$n$. O impacto é drástico para o
+\textit{Counting Sort}: sua curva sobe aproximadamente duas ordens de
+grandeza (de ${\approx}\,2{,}5 \times 10^{-5}$\,s para
+${\approx}\,1{,}8 \times 10^{-3}$\,s com $n = 10^{3}$, e de
+${\approx}\,2{,}3 \times 10^{-3}$\,s para ${\approx}\,0{,}20$\,s com
+$n = 10^{5}$), e ele ultrapassa o \textit{Merge Sort}, tornando-se o segundo
+mais lento, abaixo apenas do \textit{Insertion Sort}. A inversão ocorre
+porque os intervalos $k = 100n$ e $k = 1000n$ dominam a média: o custo
+$\mathcal{O}(k)$ de inicializar e varrer o vetor de contagens cresce
+desproporcionalmente ao trabalho útil sobre os $n$ elementos.
+
+O \textit{Radix Sort} sofre uma elevação muito mais modesta: sua
+sensibilidade a~$k$ é logarítmica, e aumentar~$k$ de $n$ para $1000n$
+acrescenta apenas $\lceil \log_{10}(1000) \rceil = 3$ passadas. Com isso, ele
+passa a ser o algoritmo mais rápido no Cenário~2 (era o segundo no
+Cenário~1) e mostra-se a alternativa mais robusta entre os lineares quando o
+intervalo não é controlado, enquanto a vantagem do \textit{Counting Sort} é
+máxima apenas quando $k \approx n$.
+
+% -------------------------------------------------------------------
+\subsection{Curvas de Tempo em Escala Linear}
+\label{subsec:linear}
+% -------------------------------------------------------------------
+
+A escala log-log comprime diferenças absolutas, por isso as curvas foram
+também analisadas em escala linear, separando os algoritmos em dois grupos.
+
+\subsubsection{Insertion Sort: a inviabilidade do crescimento quadrático}
+
+A Figura~\ref{fig:linear_insertion} mostra o \textit{Insertion Sort} em
+escala linear, nos dois cenários. A curva é claramente parabólica: os pontos para
+$n \leq 10^{4}$ mal se distinguem do eixo horizontal, e o tempo cresce
+rapidamente a partir de $n \approx 5 \times 10^{4}$, atingindo
+${\approx}\,19{,}7$\,s em $n = 10^{5}$. As curvas dos dois painéis (com
+$k = n$ e na média sobre os intervalos de~$k$) são visualmente idênticas, o
+que ilustra a independência de~$k$ nos algoritmos de comparação. A classe $\mathcal{O}(n^{2})$ torna-se proibitiva
+muito antes de entradas de grande escala, justificando-se apenas para $n$
+pequeno ou vetores quase ordenados ($\mathcal{O}(n)$).
+
+\begin{figure}[!htbp]
+  \centering
+  \begin{subfigure}[t]{0.495\columnwidth}
+    \includegraphics[width=\linewidth]{Images/escala_real_insertion_sort.png}
+    \caption{Tempo com $k = n$.}
+    \label{fig:linear_insertion_kn}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.495\columnwidth}
+    \includegraphics[width=\linewidth]{Images/escala_real_insertion_sort_media_ranges.png}
+    \caption{Tempo médio sobre todos os intervalos de $k$.}
+    \label{fig:linear_insertion_media}
+  \end{subfigure}
+  \caption{Tempo de execução do \textit{Insertion Sort} em escala linear.
+           O crescimento parabólico confirma a complexidade
+           $\mathcal{O}(n^{2})$, e a identidade visual entre os dois
+           painéis evidencia a independência do algoritmo em relação
+           a~$k$.}
+  \label{fig:linear_insertion}
+\end{figure}
+
+\subsubsection{Merge Sort, Radix Sort e Counting Sort: eficiência em
+escala}
+
+A Figura~\ref{fig:linear_eficientes} agrupa os outros três algoritmos. No
+cenário $k = n$ (painel esquerdo), todos ficam abaixo de $0{,}05$\,s para
+$n = 10^{5}$, cerca de 500 vezes menos que o \textit{Insertion Sort}, e o
+\textit{Counting Sort} tem o menor custo absoluto, pois realiza apenas quatro
+varreduras lineares e sua constante oculta em $\mathcal{O}(2n)$ é baixa.
+
+\begin{figure}[!htbp]
+  \centering
+  \begin{subfigure}[t]{0.495\columnwidth}
+    \includegraphics[width=\linewidth]{Images/escala_real_nlog_lineares.png}
+    \caption{Tempo com $k = n$.}
+    \label{fig:linear_eficientes_kn}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.495\columnwidth}
+    \includegraphics[width=\linewidth]{Images/escala_real_nlog_lineares_media_ranges.png}
+    \caption{Tempo médio sobre todos os intervalos de $k$.}
+    \label{fig:linear_eficientes_media}
+  \end{subfigure}
+  \caption{Tempo de execução em escala linear para \textit{Merge Sort},
+           \textit{Radix Sort} e \textit{Counting Sort}. À direita, o
+           \textit{Counting Sort} passa a ser o mais lento dos três.}
+  \label{fig:linear_eficientes}
+\end{figure}
+
+No painel direito (média sobre todos os intervalos de~$k$), o
+\textit{Counting Sort} sobe para ${\approx}\,0{,}20$\,s em $n = 10^{5}$,
+superando o \textit{Merge Sort} (${\approx}\,0{,}040$\,s) por um fator
+de~5 e tornando-se o mais lento dos três. O \textit{Radix Sort} é o mais
+rápido (${\approx}\,1{,}1 \times 10^{-2}$\,s), contra
+${\approx}\,8{,}7 \times 10^{-3}$\,s quando $k = n$, onde é o segundo mais
+rápido; essa pequena variação confirma sua robustez frente a~$k$.
+
+% -------------------------------------------------------------------
+\subsection{Sensibilidade ao Intervalo de Valores ($k$)}
+\label{subsec:range}
+% -------------------------------------------------------------------
+
+A Figura~\ref{fig:range} mostra o tempo médio de execução em função
+de~$k$, de $10^{3}$ a $10^{6}$, para $n = 1\,000$ fixo.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.75\columnwidth]{Images/impacto_range_n_1000.png}
+  \caption{Tempo médio de execução em função do intervalo de valores~$k$
+           para $n = 1\,000$ fixo (escala log-log). O \textit{Counting
+           Sort} supera o \textit{Radix Sort} já em $k = 10^{4}$, o
+           \textit{Merge Sort} entre $k = 10^{4}$ e $k = 10^{5}$, e o
+           \textit{Insertion Sort} entre $k = 10^{5}$ e $k = 10^{6}$.}
+  \label{fig:range}
+\end{figure}
+
+\textbf{Algoritmos de comparação.} O \textit{Insertion Sort}
+(${\approx}\,2{,}0 \times 10^{-3}$\,s) e o \textit{Merge Sort}
+(${\approx}\,3{,}0 \times 10^{-4}$\,s) apresentam linhas horizontais ao
+longo de toda a faixa de~$k$, como previsto, pois sua complexidade depende
+apenas de~$n$.
+
+\textbf{Radix Sort.} Exibe uma leve elevação com $k$, pois $k$ maior implica
+mais dígitos ($d = \lceil \log_{10} k \rceil$) e mais passadas: o tempo sobe
+de ${\approx}\,6{,}2 \times 10^{-5}$\,s ($k = 10^{3}$) para
+${\approx}\,1{,}1 \times 10^{-4}$\,s ($k = 10^{6}$), apenas
+${\approx}\,1{,}8$ vez enquanto $k$ cresce $10^{3}$ vezes.
+
+\textbf{Counting Sort.} É o mais sensível a~$k$. Para $k = n = 10^{3}$, é o
+mais rápido de todos (${\approx}\,2{,}5 \times 10^{-5}$\,s), cerca de 2,5
+vezes mais que o \textit{Radix Sort} e 12 vezes mais que o \textit{Merge
+Sort}: é o seu regime ideal, com complexidade efetiva $\mathcal{O}(2n)$.
+Com $n$ fixo, o tempo escala linearmente com~$k$, conforme
+$\mathcal{O}(n + k)$, e ocorrem três inversões:
+
+\begin{enumerate}
+  \item Entre $k = 10^{3}$ e $10^{4}$ ($k/n$ de $1$ a $10$), é ultrapassado
+        pelo \textit{Radix Sort}: em $k = 10^{3}$ ainda é mais rápido
+        (${\approx}\,2{,}5 \times 10^{-5}$\,s contra
+        ${\approx}\,6{,}2 \times 10^{-5}$\,s), mas em $k = 10^{4}$ já não
+        é (${\approx}\,8{,}3 \times 10^{-5}$\,s contra
+        ${\approx}\,6{,}7 \times 10^{-5}$\,s).
+  \item Entre $k = 10^{4}$ e $10^{5}$ ($k/n$ de $10$ a $100$), ultrapassa o
+        \textit{Merge Sort}: em $k = 10^{4}$ ainda é mais rápido
+        (${\approx}\,8{,}3 \times 10^{-5}$\,s contra
+        ${\approx}\,3{,}0 \times 10^{-4}$\,s), mas em $k = 10^{5}$ já não
+        é (${\approx}\,6{,}5 \times 10^{-4}$\,s contra
+        ${\approx}\,3{,}0 \times 10^{-4}$\,s).
+  \item Entre $k = 10^{5}$ e $10^{6}$ ($k/n$ de $100$ a $1\,000$), ultrapassa
+        também o \textit{Insertion Sort}: em $k = 10^{5}$ ainda está abaixo
+        (${\approx}\,6{,}5 \times 10^{-4}$\,s contra
+        ${\approx}\,2{,}0 \times 10^{-3}$\,s), mas em $k = 10^{6}$ torna-se
+        o mais lento de todos (${\approx}\,6{,}4 \times 10^{-3}$\,s contra
+        ${\approx}\,2{,}1 \times 10^{-3}$\,s).
+\end{enumerate}
+
+Dois problemas surgem quando $k \gg n$: (i)~\textbf{degradação de
+desempenho}, pois o algoritmo percorre e inicializa um vetor de contadores
+de tamanho~$k$ mesmo que a maioria das posições fique em zero; e
+(ii)~\textbf{consumo de memória auxiliar} $\mathcal{O}(k)$, que pode agravar
+o tempo por pior aproveitamento de cache (hipótese não verificada neste
+trabalho).
+
+Portanto, a escolha do \textit{Counting Sort} deve ser guiada pela relação
+$k/n$: quando $k \approx n$, ele é o mais rápido; já com $k/n = 10$ o
+\textit{Radix Sort} o supera, e a partir de $k/n$ entre $10$ e $100$ o
+\textit{Merge Sort} também passa a superá-lo; e, para $k$ maiores, o
+\textit{Radix Sort} oferece o melhor equilíbrio entre sensibilidade a~$k$ e
+desempenho absoluto, sendo mais rápido que o \textit{Merge Sort} em todos os
+casos avaliados.
+
+% -------------------------------------------------------------------
+\subsection{Análise Espacial: Mapa de Calor do Counting Sort}
+\label{subsec:heatmap}
+% -------------------------------------------------------------------
+
+A Figura~\ref{fig:heatmap} mostra o tempo do \textit{Counting Sort} em
+função de $n$ (eixo X) e $k$ (eixo Y), em escala de cores logarítmica: do
+amarelo claro (baixo tempo) ao vermelho-escuro (degradação severa).
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.75\columnwidth]{Images/heatmap_counting_sort.png}
+  \caption{Mapa de calor do tempo de execução do \textit{Counting Sort}
+           em função de $n$ (eixo X) e $k$ (eixo Y), com escala de cores
+           logarítmica. Tons amarelos indicam alto desempenho; tons
+           vermelho-escuros indicam degradação severa. As células em
+           branco correspondem a combinações de $n$ e $k$ que não foram
+           testadas.}
+  \label{fig:heatmap}
+\end{figure}
+
+\textbf{Diagonal de eficiência.} A região $k \approx n$ concentra os menores
+tempos (tons amarelos), onde a complexidade efetiva é $\mathcal{O}(2n)$; o
+menor tempo registrado é ${\approx}\,2{,}5 \times 10^{-5}$\,s, em
+$n = k = 1\,000$.
+
+\textbf{Degradação vertical.} Aumentando~$k$ com $n$ fixo, as cores passam
+do amarelo ao vermelho-escuro, assinatura do custo $\mathcal{O}(k)$ da
+varredura dos contadores. Para $n = 10^{5}$ e $k = 10^{8}$, o tempo foi de
+${\approx}\,0{,}73$\,s, mais de 300 vezes o do ponto ideal da diagonal
+(${\approx}\,2{,}3 \times 10^{-3}$\,s).
+
+O mapa serve, assim, como ferramenta de decisão: dado um par $(n, k)$,
+indica se o \textit{Counting Sort} opera em regime eficiente (região clara)
+ou se \textit{Radix Sort} ou \textit{Merge Sort} são preferíveis (região
+escura).
+
+% -------------------------------------------------------------------
+\subsection{Síntese Comparativa}
+\label{subsec:sintese}
+% -------------------------------------------------------------------
+
+A Tabela~\ref{tab:sintese} consolida as complexidades teóricas e as
+principais observações empíricas.
+
+\begin{table}[!htbp]
+  \centering
+  \caption{Síntese das complexidades teóricas e do comportamento
+           experimental dos algoritmos avaliados. $b$ é a base numérica
+           usada pelo Radix Sort (aqui, $b = 10$).
+           ``Cond.'' indica viabilidade condicional à relação $k/n$.}
+  \label{tab:sintese}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Algoritmo} & \textbf{Complexidade} & \textbf{Espaço} &
+    \textbf{Dep.\ de $k$} &
+    \textbf{Viável p/ $n = 10^{5}$} \\
+    \midrule
+    Insertion Sort & $\mathcal{O}(n^{2})$    & $\mathcal{O}(1)$      & Não      & Não   \\
+    Merge Sort     & $\mathcal{O}(n \log n)$ & $\mathcal{O}(n)$      & Não      & Sim   \\
+    Radix Sort     & $\mathcal{O}(d \cdot n)$& $\mathcal{O}(n + b)$  & Indireta & Sim   \\
+    Counting Sort  & $\mathcal{O}(n + k)$    & $\mathcal{O}(k)$      & Direta   & Cond. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Não existe algoritmo universalmente superior: a escolha depende do perfil da
+instância. Com $k \approx n$, o \textit{Counting Sort} é o mais
+rápido (${\approx}\,2{,}3 \times 10^{-3}$\,s para $n = 10^{5}$). Quando $k$
+cresce além de $n$, o \textit{Radix Sort} é o melhor compromisso: foi o mais
+rápido na média sobre os intervalos e o segundo quando $k = n$. O
+\textit{Merge Sort} é a melhor opção entre os algoritmos de comparação, com
+desempenho independente de~$k$. O \textit{Insertion Sort} mostrou-se
+inviável em escala: para $n = 10^{5}$, foi cerca de 500 vezes mais lento que
+o \textit{Merge Sort} e quase quatro ordens de grandeza mais lento que o
+\textit{Counting Sort} com $k = n$.
 
 % ============================================================
 \section{Conclusão}
+\label{sec:conclusao}
 % ============================================================
 
-% Resumir os principais achados e relacionar com os objetivos do trabalho.
+Este trabalho implementou e comparou experimentalmente o Insertion Sort, o
+Merge Sort, o Counting Sort e o Radix Sort sobre vetores de inteiros
+aleatórios, variando o tamanho $n$ da entrada e o intervalo de valores $k$.
+Os resultados confirmaram as análises teóricas: o Insertion Sort apresentou
+crescimento quadrático e levou cerca de $19{,}7$\,s para ordenar
+$10^{5}$ elementos, tornando-se inviável em entradas de maior escala; o
+Merge Sort manteve comportamento $\Theta(n \log n)$ e tempo independente de
+$k$; e os algoritmos lineares exibiram crescimento próximo de linear
+quando $k = \mathcal{O}(n)$.
+
+A principal conclusão é que o parâmetro $k$ determina o desempenho dos
+algoritmos lineares. O Counting Sort foi o mais rápido quando $k = n$
+($\approx 2{,}3 \times 10^{-3}$\,s para $n = 10^{5}$), mas degradou-se
+rapidamente à medida que $k$ superou $n$: já com $k = 10n$ foi superado
+pelo Radix Sort, na média sobre todos os intervalos testados passou a ser
+mais lento que o Merge Sort, e para $n = 1\,000$ e $k = 10^{6}$ chegou a ser
+mais lento que o próprio Insertion Sort. Além do tempo, seu uso de memória
+auxiliar $\mathcal{O}(k)$ reforça a necessidade de cautela quando o
+intervalo de valores é grande. O Radix Sort, por sua vez, mostrou-se pouco
+sensível a $k$, com variação de apenas ${\approx}\,1{,}8$ vez quando $k$
+cresceu $10^{3}$ vezes, e foi o mais rápido na média sobre os intervalos
+testados ($\approx 1{,}1 \times 10^{-2}$\,s para $n = 10^{5}$), o que o
+torna a alternativa mais robusta entre os algoritmos lineares quando o
+intervalo dos dados não é conhecido.
+
+Conclui-se, portanto, que não existe um algoritmo universalmente superior,
+e que a escolha deve considerar o perfil da instância, em particular a
+relação $k/n$: o Counting Sort é preferível quando $k \approx n$; o
+Radix Sort, quando $k$ é maior ou desconhecido; o Merge Sort oferece uma
+garantia $\mathcal{O}(n \log n)$ independente de $k$ entre os algoritmos de
+comparação; e o Insertion Sort fica restrito a entradas pequenas ou quase
+ordenadas.
+
+Os resultados valem para as condições avaliadas: vetores de inteiros com
+distribuição uniforme, uma única máquina e uma única configuração de
+compilação (sem otimizações), de modo que os tempos absolutos podem diferir
+em código compilado com \texttt{-O2} ou \texttt{-O3}. Como trabalhos futuros, sugere-se avaliar outras distribuições
+de dados (como vetores quase ordenados ou com muitos valores repetidos),
+outras bases no Radix Sort e a comparação com algoritmos como Quick Sort e
+Heap Sort.
 
 \bibliographystyle{sbc}
 \bibliography{sbc-template}

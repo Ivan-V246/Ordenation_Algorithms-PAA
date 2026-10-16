@@ -17,7 +17,6 @@ int main() {
     int interval_n[] = {1000, 5000, 10000, 50000, 100000};
 
     // Gera os aquivos com os dados númericos
-
     for(int i = 0; i < 5; i++){
         std::string dir = BASE_SAVE_PATH + std::to_string(i + 1);
 
@@ -27,7 +26,7 @@ int main() {
         }
     }
 
-    // // Cabeçalho base de uma função de ordenação
+    // Cabeçalho base de uma função de ordenação
     using sort_function = void(*)(std::vector<int>&);
 
     // Mapeamento das funções de ordnação
@@ -82,9 +81,9 @@ int main() {
                     bool response = write_json(save_path, data);
 
                     if (response) {
-                        std::cout << "\nDados escritos com sucesso em " << save_path << std::endl;
+                        std::cout << "\nDados escritos com sucesso, em: " << save_path << std::endl;
                     } else {
-                        std::cout << "\nErro ao escrever dados!Em: "  << save_path<< std::endl;
+                        std::cout << "\nErro ao escrever dados, em: "  << save_path<< std::endl;
                     }
                 }   
             }
